@@ -1,0 +1,6 @@
+{
+  "name": "The Sweet Savour",
+  "description": "Premium luxury perfume oil brand inspired by faith, offering exquisite, long-lasting fragrances sourced from Dubai and the US.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    font-family: 'Plus Jakarta Sans', 'Montserrat', sans-serif;
+  }
+  
+  h1, h2, h3, h4, .font-serif-lux {
+    font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+  }
+  
+  .font-cinzel {
+    font-family: 'Cinzel', serif;
+  }
+  
+  .font-sans-lux {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: 0.06em;
+  }
+
+  ::selection {
+    background-color: #EACE8C;
+    color: #1A1A1A;
+  }
+}
+
+@layer utilities {
+  .text-gold {
+    background: linear-gradient(135deg, #f0d59e 0%, #d4af37 50%, #aa7c11 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .bg-cream-gradient {
+    background: linear-gradient(180deg, #FDFBF7 0%, #FAF6F0 100%);
+  }
+
+  .bg-dark-luxury {
+    background: linear-gradient(180deg, #151515 0%, #0A0A0A 100%);
+  }
+  
+  .gold-border {
+    border-image: linear-gradient(to right, #f0d59e, #d4af37, #aa7c11) 1;
+  }
+
+  /* Custom high-end scrollbars */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #FAF6F0;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #EACE8C;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #d4af37;
+  }
+}
+
+/* Animations and decorative touches */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes scaleUp {
+  from { transform: scale(1.05); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.animate-scale-up {
+  animation: scaleUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
