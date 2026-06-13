@@ -30,7 +30,7 @@ export default function Footer({ settings, onNavigate }: FooterProps) {
               "For we are to God the pleasing aroma of Christ among those who are being saved and those who are perishing."
             </p>
             <p className="text-sm font-cinzel text-gold uppercase tracking-widest">
-              — 2 Corinthians 2:15
+              — Philippians 4:18 (KJV)
             </p>
           </div>
 

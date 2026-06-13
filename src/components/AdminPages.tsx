@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Collection, Product, ProductImage, Settings, supabase, 
-  saveCollection, deleteCollection, saveProduct, deleteProduct, saveSettings, BOOTSTRAP_SQL_SCRIPT
+  saveCollection, deleteCollection, saveProduct, deleteProduct, saveSettings, BOOTSTRAP_SQL_SCRIPT,
+  Testimonial, saveTestimonial, deleteTestimonial
 } from '../supabase';
 import { 
   Shield, Key, User, Plus, Edit2, Trash2, Check, X, 
@@ -11,10 +12,82 @@ import {
 } from 'lucide-react';
 import Logo from './Logo';
 
+// Reusable Drag and Drop Image Uploader
+const ImageUploader = ({ 
+  currentImage, 
+  onImageSelected, 
+  label = "Upload Image" 
+}: { 
+  currentImage?: string, 
+  onImageSelected: (base64: string) => void,
+  label?: string 
+}) => {
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        onImageSelected(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        onImageSelected(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <label className="text-sm font-cinzel text-[#1A1A1A]/60 uppercase tracking-widest font-bold block">
+        {label}
+      </label>
+      <div 
+        onClick={() => fileInputRef.current?.click()}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={handleDrop}
+        className="border-2 border-dashed border-[#EACE8C]/50 rounded-xs p-6 text-center cursor-pointer hover:bg-gold/5 transition duration-300 relative group overflow-hidden"
+      >
+        <input 
+          type="file" 
+          ref={fileInputRef} 
+          className="hidden" 
+          accept="image/*" 
+          onChange={handleFileChange} 
+        />
+        {currentImage ? (
+          <div className="relative w-full h-40 flex justify-center">
+            <img src={currentImage} className="h-full object-contain" alt="Preview" />
+            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
+              <span className="text-white font-cinzel text-sm uppercase tracking-wider">Change Image</span>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-2 py-4">
+            <Upload className="w-8 h-8 text-gold mx-auto" />
+            <p className="text-[#1A1A1A]/70 text-sm">Drag & drop an image here, or tap to browse</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 interface AdminPagesProps {
   collections: Collection[];
   products: Product[];
   productImages: ProductImage[];
+  testimonials: Testimonial[];
   settings: Settings;
   onRefreshData: () => void;
   onNavigateHome: () => void;
@@ -24,6 +97,7 @@ export default function AdminPages({
   collections,
   products,
   productImages,
+  testimonials,
   settings,
   onRefreshData,
   onNavigateHome
@@ -47,7 +121,7 @@ export default function AdminPages({
   const [isLoading, setIsLoading] = useState(false);
 
   // Active sub-view in Admin
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'collections' | 'products' | 'settings' | 'sql'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'collections' | 'products' | 'testimonials' | 'settings' | 'sql'>('dashboard');
 
   // CRUD Form editing states - Collections
   const [isEditingCol, setIsEditingCol] = useState(false);
@@ -58,6 +132,10 @@ export default function AdminPages({
   const [editedProd, setEditedProd] = useState<Partial<Product> | null>(null);
   const [auxiliaryImageUrls, setAuxiliaryImageUrls] = useState<string[]>([]);
   const [newAuxUrl, setNewAuxUrl] = useState('');
+
+  // CRUD Form editing states - Testimonials
+  const [isEditingTesti, setIsEditingTesti] = useState(false);
+  const [editedTesti, setEditedTesti] = useState<Partial<Testimonial> | null>(null);
 
   // Settings State
   const [tempSettings, setTempSettings] = useState<Settings>({ ...settings });
@@ -381,6 +459,42 @@ export default function AdminPages({
     setAuxiliaryImageUrls(auxiliaryImageUrls.filter((_, i) => i !== index));
   };
 
+  
+  const startEditTesti = (testi?: Testimonial) => {
+    if (testi) setEditedTesti({ ...testi });
+    else setEditedTesti({ name: '', text: '', rating: 5, verse: '' });
+    setIsEditingTesti(true);
+  };
+
+  const saveTestiHandler = async () => {
+    if (!editedTesti?.name || !editedTesti?.text) {
+      setAlertModal({ isOpen: true, type: 'error', message: 'Name and text are required.' });
+      return;
+    }
+    setIsLoading(true);
+    const payload = {
+      id: editedTesti.id || `testi-${Date.now()}`,
+      name: editedTesti.name,
+      rating: editedTesti.rating || 5,
+      verse: editedTesti.verse,
+      text: editedTesti.text,
+      avatar: editedTesti.avatar
+    };
+    await saveTestimonial(payload);
+    onRefreshData();
+    setIsEditingTesti(false);
+    setIsLoading(false);
+    setAlertModal({ isOpen: true, type: 'success', message: 'Testimonial saved!' });
+  };
+
+  const deleteTestiHandler = async (id: string) => {
+    setIsLoading(true);
+    await deleteTestimonial(id);
+    onRefreshData();
+    setIsLoading(false);
+    setAlertModal({ isOpen: true, type: 'success', message: 'Testimonial deleted!' });
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-dark-luxury p-4 bg-[url('/admin-bg.png')] bg-cover bg-center bg-no-repeat relative">
@@ -508,6 +622,7 @@ export default function AdminPages({
             { id: 'dashboard', label: 'Console Overview', icon: LayoutDashboard },
             { id: 'collections', label: 'Signature Collections', icon: Tag },
             { id: 'products', label: 'Perfume Oils', icon: ShoppingBag },
+            { id: 'testimonials', label: 'Client Impressions', icon: Star },
             { id: 'settings', label: 'Store Settings', icon: SettingsIcon }
           ].map(tab => {
             const Icon = tab.icon;
@@ -874,7 +989,11 @@ export default function AdminPages({
             {/* List Collections Card */}
             {!isEditingCol && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {collections.map(col => (
+                {[...collections].sort((a, b) => {
+                  if (a.status === 'Coming Soon' && b.status !== 'Coming Soon') return -1;
+                  if (a.status !== 'Coming Soon' && b.status === 'Coming Soon') return 1;
+                  return 0;
+                }).map(col => (
                   <div key={col.id} className="bg-white border border-[#EACE8C]/15 rounded-xs overflow-hidden shadow-xs relative flex flex-col justify-between">
                     
                     {/* Visual Preview banner */}
@@ -1279,6 +1398,89 @@ export default function AdminPages({
               </div>
             )}
 
+          </div>
+        )}
+
+        
+        {/* VIEW 3.5: TESTIMONIALS CRUD */}
+        {activeTab === 'testimonials' && (
+          <div className="space-y-8 text-left animate-fade-in">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <h2 className="text-2xl font-serif text-[#1A1A1A]">Client Impressions</h2>
+                <p className="text-[#1A1A1A]/60 text-sm mt-1">Manage what your clients are saying about your brand.</p>
+              </div>
+              {!isEditingTesti && (
+                <button
+                  onClick={() => startEditTesti()}
+                  className="px-5 py-2.5 bg-[#1A1A1A] text-white hover:bg-[#2A2A2A] text-sm font-semibold uppercase tracking-wider rounded-xs flex items-center space-x-2 transition cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>New Testimonial</span>
+                </button>
+              )}
+            </div>
+
+            {isEditingTesti ? (
+              <div className="bg-white border border-[#EACE8C]/30 p-6 sm:p-8 rounded-xs shadow-sm space-y-8">
+                <div className="flex items-center justify-between border-b border-[#EACE8C]/20 pb-4">
+                  <h3 className="font-cinzel text-xl font-bold uppercase tracking-widest text-[#1A1A1A]">
+                    {editedTesti?.id ? 'Edit Testimonial' : 'Create New Testimonial'}
+                  </h3>
+                  <button onClick={() => setIsEditingTesti(false)} className="text-[#1A1A1A]/50 hover:text-[#1A1A1A] cursor-pointer">
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-cinzel text-[#1A1A1A]/60 uppercase tracking-widest font-bold block">Client Name</label>
+                    <input type="text" value={editedTesti?.name || ''} onChange={(e) => setEditedTesti({ ...editedTesti, name: e.target.value })} className="w-full py-2.5 px-3 bg-cream-gradient border border-[#EACE8C]/20 text-base outline-hidden focus:border-gold rounded-xs" placeholder="e.g. John Doe" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-cinzel text-[#1A1A1A]/60 uppercase tracking-widest font-bold block">Subtitle / Tag</label>
+                    <input type="text" value={editedTesti?.verse || ''} onChange={(e) => setEditedTesti({ ...editedTesti, verse: e.target.value })} className="w-full py-2.5 px-3 bg-cream-gradient border border-[#EACE8C]/20 text-base outline-hidden focus:border-gold rounded-xs" placeholder="e.g. Luxury Fragrance Collector" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-cinzel text-[#1A1A1A]/60 uppercase tracking-widest font-bold block">Rating (1-5)</label>
+                    <input type="number" min="1" max="5" value={editedTesti?.rating || 5} onChange={(e) => setEditedTesti({ ...editedTesti, rating: parseInt(e.target.value) })} className="w-full py-2.5 px-3 bg-cream-gradient border border-[#EACE8C]/20 text-base outline-hidden focus:border-gold rounded-xs" />
+                  </div>
+                  <div className="sm:col-span-2 space-y-1.5">
+                    <label className="text-sm font-cinzel text-[#1A1A1A]/60 uppercase tracking-widest font-bold block">Testimonial Text</label>
+                    <textarea rows={3} value={editedTesti?.text || ''} onChange={(e) => setEditedTesti({ ...editedTesti, text: e.target.value })} className="w-full py-2.5 px-3 bg-cream-gradient border border-[#EACE8C]/20 text-base outline-hidden focus:border-gold rounded-xs resize-none" placeholder="Their glowing review..." />
+                  </div>
+                  <div className="sm:col-span-2 space-y-4">
+                    <ImageUploader label="Client Avatar / Photo" currentImage={editedTesti?.avatar || undefined} onImageSelected={(base64) => setEditedTesti({ ...editedTesti, avatar: base64 })} />
+                  </div>
+                </div>
+                <div className="flex justify-end pt-6 border-t border-[#EACE8C]/20">
+                  <button onClick={saveTestiHandler} disabled={isLoading} className="px-6 py-3 bg-gold hover:bg-[#d4af37] text-white font-semibold uppercase tracking-widest rounded-xs flex items-center space-x-2 transition shadow-md disabled:opacity-50 cursor-pointer">
+                    <Check className="w-4 h-4" />
+                    <span>{isLoading ? 'Saving...' : 'Save Testimonial'}</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {testimonials.map(t => (
+                  <div key={t.id} className="bg-white border border-[#EACE8C]/15 rounded-xs p-6 shadow-xs flex flex-col justify-between">
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-4">
+                        {t.avatar ? <img src={t.avatar} className="w-12 h-12 rounded-full object-cover border border-gold/30" alt={t.name} /> : <div className="w-12 h-12 rounded-full bg-cream-gradient border border-gold/30 flex items-center justify-center"><User className="w-5 h-5 text-gold" /></div>}
+                        <div>
+                          <h4 className="font-bold text-[#1A1A1A] font-cinzel">{t.name}</h4>
+                          {t.verse && <p className="text-xs text-[#1A1A1A]/60 uppercase tracking-widest">{t.verse}</p>}
+                        </div>
+                      </div>
+                      <p className="text-sm italic text-[#1A1A1A]/80 font-serif leading-relaxed line-clamp-4">"{t.text}"</p>
+                    </div>
+                    <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-[#EACE8C]/15">
+                      <button onClick={() => startEditTesti(t)} className="p-2 text-[#1A1A1A]/40 hover:text-gold transition cursor-pointer"><Edit2 className="w-4 h-4" /></button>
+                      <button onClick={() => setConfirmModal({ isOpen: true, message: 'Delete this testimonial?', onConfirm: () => deleteTestiHandler(t.id) })} className="p-2 text-[#1A1A1A]/40 hover:text-red-500 transition cursor-pointer"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

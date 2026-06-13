@@ -4,9 +4,9 @@ import Footer from './components/Footer';
 import PublicPages from './components/PublicPages';
 import AdminPages from './components/AdminPages';
 import { 
-  getCollections, getProducts, getProductImages, getSettings,
-  Collection, Product, ProductImage, Settings,
-  INITIAL_COLLECTIONS, INITIAL_PRODUCTS, INITIAL_IMAGES, DEFAULT_SETTINGS
+  getCollections, getProducts, getProductImages, getSettings, getTestimonials,
+  Collection, Product, ProductImage, Settings, Testimonial,
+  INITIAL_COLLECTIONS, INITIAL_PRODUCTS, INITIAL_IMAGES, DEFAULT_SETTINGS, INITIAL_TESTIMONIALS
 } from './supabase';
 import { Sparkles } from 'lucide-react';
 
@@ -14,6 +14,7 @@ export default function App() {
   const [collections, setCollections] = useState<Collection[]>(INITIAL_COLLECTIONS);
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
   const [productImages, setProductImages] = useState<ProductImage[]>(INITIAL_IMAGES);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>(INITIAL_TESTIMONIALS);
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   
   const [currentView, setCurrentView] = useState<string>('home'); // 'home' | 'product' | 'admin'
@@ -26,11 +27,20 @@ export default function App() {
       const cols = await getCollections();
       const prods = await getProducts();
       const imgs = await getProductImages();
+      let tests = await getTestimonials();
+      
+      // Force cache bust if user has old data with < 7 testimonials
+      if (tests.length < 7) {
+        window.localStorage.removeItem('sweetsavour_testimonials');
+        tests = INITIAL_TESTIMONIALS;
+      }
+      
       const settingsData = await getSettings();
 
       setCollections(cols);
       setProducts(prods);
       setProductImages(imgs);
+      setTestimonials(tests);
       setSettings(settingsData);
     } catch (err) {
       console.error('Core data load failed', err);
@@ -108,6 +118,7 @@ export default function App() {
             collections={collections}
             products={products}
             productImages={productImages}
+            testimonials={testimonials}
             settings={settings}
             onRefreshData={loadStoreData}
             onNavigateHome={() => handleNavigation('home')}
@@ -117,6 +128,7 @@ export default function App() {
             collections={collections}
             products={products}
             productImages={productImages}
+            testimonials={testimonials}
             settings={settings}
             currentView={currentView}
             selectedSlug={selectedSlug}

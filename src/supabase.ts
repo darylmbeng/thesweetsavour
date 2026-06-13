@@ -51,6 +51,16 @@ export interface Settings {
   };
 }
 
+export interface Testimonial {
+  id: string;
+  name: string;
+  rating: number;
+  verse?: string;
+  text: string;
+  avatar?: string;
+  created_at?: string;
+}
+
 // Elegant initial seeded data for fallback and out-of-the-box experience
 export const INITIAL_COLLECTIONS: Collection[] = [
   {
@@ -155,6 +165,16 @@ export const INITIAL_IMAGES: ProductImage[] = [
   { id: "img-4", product_id: "prod-4", image_url: "https://images.unsplash.com/photo-1523293182086-7651a899d37f?auto=format&fit=crop&w=800&q=80" }
 ];
 
+export const INITIAL_TESTIMONIALS: Testimonial[] = [
+  { id: "testi-1", name: "Client Impression", rating: 5, verse: "Signature Collection Enthusiast", text: "The fragrances are incredibly long-lasting and command an elegant presence.", avatar: "/testimonials/testi_1.jpeg", created_at: new Date().toISOString() },
+  { id: "testi-2", name: "Client Impression", rating: 5, verse: "Luxury Fragrance Collector", text: "Absolutely stunning presentation and the scent profile is exactly what I was looking for.", avatar: "/testimonials/teti_2.jpeg", created_at: new Date().toISOString() },
+  { id: "testi-3", name: "Client Impression", rating: 5, verse: "Beauty Editor", text: "A phenomenal collection that rivals the top luxury brands across the world.", avatar: "/testimonials/testi_3.jpeg", created_at: new Date().toISOString() },
+  { id: "testi-4", name: "Client Impression", rating: 5, verse: "Perfume Connoisseur", text: "Every scent tells a beautiful story. It's rare to find such high-quality oils.", avatar: "/testimonials/testi_4.jpeg", created_at: new Date().toISOString() },
+  { id: "testi-5", name: "Client Impression", rating: 5, verse: "Boutique Owner", text: "I am amazed by the longevity of these oils. They linger gracefully throughout the day.", avatar: "/testimonials/testi_5.jpeg", created_at: new Date().toISOString() },
+  { id: "testi-6", name: "Client Impression", rating: 5, verse: "Creative Director", text: "An elegant, divine fragrance experience that truly stands out from the rest.", avatar: "/testimonials/testi_6.jpeg", created_at: new Date().toISOString() },
+  { id: "testi-7", name: "Client Impression", rating: 5, verse: "Loyal Customer", text: "The attention to detail and exquisite notes make this my signature scent.", avatar: "/testimonials/testi_7.jpeg", created_at: new Date().toISOString() }
+];
+
 export const DEFAULT_SETTINGS: Settings = {
   id: "setting-default",
   whatsapp_number: "+237681193469", // Provided by user: +237 6 81 19 34 69
@@ -194,6 +214,9 @@ if (!localStorage.getItem('sweetsavour_products')) {
 }
 if (!localStorage.getItem('sweetsavour_product_images')) {
   setLocalData('product_images', INITIAL_IMAGES);
+}
+if (!localStorage.getItem('sweetsavour_testimonials')) {
+  setLocalData('testimonials', INITIAL_TESTIMONIALS);
 }
 const storedSettings = localStorage.getItem('sweetsavour_settings');
 if (storedSettings) {
@@ -488,6 +511,54 @@ export async function saveSettings(settings: Settings): Promise<Settings> {
   return settings;
 }
 
+export async function getTestimonials(): Promise<Testimonial[]> {
+  try {
+    const { data, error } = await supabase.from('testimonials').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    if (data && data.length > 0) {
+      setLocalData('testimonials', data);
+      return data as Testimonial[];
+    }
+  } catch (err) {
+    console.log('Using local testimonials fallback', err);
+  }
+  return getLocalData<Testimonial[]>('testimonials', INITIAL_TESTIMONIALS);
+}
+
+export async function saveTestimonial(testimonial: Omit<Testimonial, 'created_at'>): Promise<Testimonial> {
+  let saved = { ...testimonial, created_at: new Date().toISOString() };
+  const locals = getLocalData<Testimonial[]>('testimonials', INITIAL_TESTIMONIALS);
+  const existingIdx = locals.findIndex(t => t.id === testimonial.id);
+  if (existingIdx >= 0) {
+    locals[existingIdx] = { ...locals[existingIdx], ...testimonial };
+    saved = locals[existingIdx];
+  } else {
+    locals.push(saved);
+  }
+  setLocalData('testimonials', locals);
+
+  try {
+    const { data, error } = await supabase.from('testimonials').upsert(testimonial, { onConflict: 'id' }).select().single();
+    if (error) throw error;
+    if (data) return data as Testimonial;
+  } catch (err) {
+    console.warn('Supabase testimonial save failed', err);
+  }
+  return saved;
+}
+
+export async function deleteTestimonial(id: string): Promise<boolean> {
+  const locals = getLocalData<Testimonial[]>('testimonials', INITIAL_TESTIMONIALS);
+  setLocalData('testimonials', locals.filter(t => t.id !== id));
+  try {
+    const { error } = await supabase.from('testimonials').delete().eq('id', id);
+    if (error) throw error;
+  } catch (err) {
+    console.warn('Supabase testimonial delete failed', err);
+  }
+  return true;
+}
+
 // SQL Script string that the administrator can run inside Supabase SQL editor to bootstrap everything.
 export const BOOTSTRAP_SQL_SCRIPT = `-- =======================================================
 -- CONFIGURATION SQL FOR THE SWEET SAVOUR PERFUME WEBSITE
@@ -540,6 +611,17 @@ CREATE TABLE IF NOT EXISTS public.settings (
   social_links JSONB DEFAULT '{"instagram": "https://www.instagram.com/thesweetsavour_?igsh=YzljYTk1ODg3Zg==", "facebook": "https://facebook.com/thesweetsavour"}'::jsonb
 );
 
+-- 4.1 Create Testimonials Table
+CREATE TABLE IF NOT EXISTS public.testimonials (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  rating INTEGER DEFAULT 5,
+  verse TEXT,
+  text TEXT NOT NULL,
+  avatar TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 -- 5. Seed initial data
 INSERT INTO public.collections (id, name, slug, description, category, status, hero_image)
 VALUES 
@@ -566,6 +648,17 @@ ON CONFLICT DO NOTHING;
 
 INSERT INTO public.settings (id, whatsapp_number, business_email, social_links)
 VALUES ('setting-default', '+237681193469', 'contact@thesweetsavour.com', '{"instagram": "https://www.instagram.com/thesweetsavour_?igsh=YzljYTk1ODg3Zg==", "facebook": "https://facebook.com/thesweetsavour", "twitter": "https://twitter.com/thesweetsavour"}')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO public.testimonials (id, name, rating, verse, text, avatar)
+VALUES
+  ('testi-1', 'Client Impression', 5, 'Signature Collection Enthusiast', 'The fragrances are incredibly long-lasting and command an elegant presence.', '/testimonials/testi_1.jpeg'),
+  ('testi-2', 'Client Impression', 5, 'Luxury Fragrance Collector', 'Absolutely stunning presentation and the scent profile is exactly what I was looking for.', '/testimonials/teti_2.jpeg'),
+  ('testi-3', 'Client Impression', 5, 'Beauty Editor', 'A phenomenal collection that rivals the top luxury brands across the world.', '/testimonials/testi_3.jpeg'),
+  ('testi-4', 'Client Impression', 5, 'Perfume Connoisseur', 'Every scent tells a beautiful story. It''s rare to find such high-quality oils.', '/testimonials/testi_4.jpeg'),
+  ('testi-5', 'Client Impression', 5, 'Boutique Owner', 'I am amazed by the longevity of these oils. They linger gracefully throughout the day.', '/testimonials/testi_5.jpeg'),
+  ('testi-6', 'Client Impression', 5, 'Creative Director', 'An elegant, divine fragrance experience that truly stands out from the rest.', '/testimonials/testi_6.jpeg'),
+  ('testi-7', 'Client Impression', 5, 'Loyal Customer', 'The attention to detail and exquisite notes make this my signature scent.', '/testimonials/testi_7.jpeg')
 ON CONFLICT (id) DO NOTHING;
 
 -- 6. Enable Row Level Security (RLS) on all tables for integrity

@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Collection, Product, ProductImage, Settings } from '../supabase';
+import { Collection, Product, ProductImage, Settings, Testimonial } from '../supabase';
 import { 
   ChevronLeft, Sparkles, MessageSquare, Shield, HelpCircle, 
-  CheckCircle, Plus, Eye, ArrowRight, ArrowLeft, Star, Quote, Award 
+  CheckCircle, Plus, Eye, ArrowRight, ArrowLeft, Star, Quote, Award, X, ZoomIn, ZoomOut
 } from 'lucide-react';
 
 interface PublicPagesProps {
   collections: Collection[];
   products: Product[];
   productImages: ProductImage[];
+  testimonials: Testimonial[];
   settings: Settings;
   currentView: string;
   selectedSlug: string;
@@ -30,6 +31,7 @@ export default function PublicPages({
   collections, 
   products, 
   productImages, 
+  testimonials,
   settings, 
   currentView, 
   selectedSlug, 
@@ -40,7 +42,19 @@ export default function PublicPages({
   const [selectedColFilter, setSelectedColFilter] = useState<string | null>(null);
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [currentProductImageIdx, setCurrentProductImageIdx] = useState(0);
+
+  const openLightbox = (url: string) => {
+    setSelectedImage(url);
+    setZoomLevel(1);
+  };
+
+  const closeLightbox = () => {
+    setSelectedImage(null);
+    setZoomLevel(1);
+  };
 
   // Set selected product if routing to detail view
   useEffect(() => {
@@ -67,36 +81,12 @@ export default function PublicPages({
     return collections.find(c => c.id === id)?.name || "Signature Collection";
   };
 
-  // Testimonial Data
-  const testimonials = [
-    {
-      name: "Deborah Elong",
-      rating: 5,
-      verse: "Signature Collection Enthusiast",
-      text: "The Manna Nectar is absolutely sublime. It lingers beautifully throughout the day with an exquisitely clean and sweet fragrance. People constantly stop me to ask what I am wearing—it's truly captivating.",
-      avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=120&h=120&q=80"
-    },
-    {
-      name: "Samuel Noah",
-      rating: 5,
-      verse: "Luxury Fragrance Collector",
-      text: "Ember of Adonai commands presence. It carries a heavy, respectful wood scent that smells expensive and lasts through long events. I highly recommend it for any man seeking a signature perfume.",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&h=120&q=80"
-    },
-    {
-      name: "Hannah Grace",
-      rating: 5,
-      verse: "Beauty & Lifestyle Editor",
-      text: "The Solomon's Rose is deep, elegant, and modern. Best part about these perfume oils is that they don't evaporate after an hour like alcohol perfumes. 100% worth the investment.",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120&q=80"
-    }
-  ];
-
+  // Testimonials now provided by props
   // FAQs Data
   const faqs = [
     {
-      q: "What makes perfume oils better than alcohol-based spray perfumes?",
-      a: "Perfume oils contain 100% pure fragrance oil concentrate without dehydrating alcohol fillers. Because wood and floral oils anchor directly to the skin, they do not evaporate quickly, offering an exceptional 12 to 24-hour presence. They are also gentle on sensitive skin."
+      q: "What makes perfume oils unique?",
+      a: "Perfume oils contain 100% pure fragrance oil concentrate. Because wood and floral oils anchor directly to the skin, they do not evaporate quickly, offering an exceptional 12 to 24-hour presence. They are also gentle on sensitive skin."
     },
     {
       q: "Where do you source your perfume ingredients from?",
@@ -290,7 +280,7 @@ export default function PublicPages({
                 </div>
                 <div className="flex items-center space-x-2">
                   <CheckCircle className="w-4 h-4 text-gold shrink-0" />
-                  <span>Alcohol-Free Longevity (12+ Hours)</span>
+                  <span>Exceptional Longevity (12+ Hours)</span>
                 </div>
               </div>
 
@@ -358,7 +348,7 @@ export default function PublicPages({
                 <span className="text-sm uppercase font-semibold text-[#FAF6F0]/50 tracking-wider">Premium Volume</span>
               </div>
               <div className="col-span-2 md:col-span-1">
-                <span className="text-gold font-bold font-cinzel text-sm sm:text-base block">100% Alcohol-Free</span>
+                <span className="text-gold font-bold font-cinzel text-sm sm:text-base block">100% Pure Concentrate</span>
                 <span className="text-sm uppercase font-semibold text-[#FAF6F0]/50 tracking-wider font-sans">Pure Fragrance Oil</span>
               </div>
             </div>
@@ -419,10 +409,10 @@ export default function PublicPages({
                 {/* Decorative scripture overlay */}
                 <div className="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-[#111]/90 via-[#111]/60 to-transparent text-[#FAF6F0] text-left">
                   <p className="text-base italic text-[#FAF6F0]/80 mb-2 leading-relaxed font-serif">
-                    "But thanks be to God, who always leads us as captives in Christ's triumphal procession and uses us to spread the aroma of the knowledge of Him everywhere."
+                    “And walk in love, as Christ also hath loved us… an offering and a sacrifice to God for a sweet-smelling savour.”
                   </p>
                   <p className="text-base font-cinzel text-[#EACE8C] uppercase tracking-widest">
-                    — 2 Corinthians 2:14
+                    — Ephesians 5:2
                   </p>
                 </div>
               </div>
@@ -449,32 +439,78 @@ export default function PublicPages({
 
               <div className="space-y-6 text-[#1A1A1A]/70 font-light text-sm leading-relaxed">
                 <p>
-                  The Sweet Savour is a Christian-inspired perfume oil brand dedicated to creating luxurious, long-lasting fragrances. We carefully source premium perfume oils from trusted suppliers in Dubai and the United States to craft scents that inspire confidence, elegance, and memorable experiences.
+                  More than a fragrance, The Sweet Savour is a reflection of worship, excellence, and divine presence.
                 </p>
                 <p>
-                  Our mission is to provide high-quality fragrance oils that highly suit different occasions, personalities, and lifestyles while maintaining exceptional quality and ultimate affordability.
+                  Inspired by Scripture, our brand is founded on the belief that what is offered with love becomes a sweet aroma before God. Just as sacrifices, prayers, and acts of devotion ascended as a pleasing fragrance unto Him, we create scents that leave a lasting impression of grace, beauty, and purpose.
                 </p>
                 <p>
-                  Currently, our signature fragrances are available in boutique 30ml bottles, with exciting plans to expand into larger sizes and premium alcohol-based perfumes in the future.
+                  Every bottle is crafted with intention—designed not merely to be worn, but to tell a story. A story of confidence, refinement, and the beauty of a life surrendered to God.
+                </p>
+                <p>
+                  At The Sweet Savour, fragrance is more than scent; it is presence. It is the unseen signature that lingers long after you have gone, just as God’s goodness leaves its mark upon every life it touches.
                 </p>
               </div>
 
-              {/* USP parameters */}
-              <div className="grid grid-cols-2 gap-6 pt-4 border-t border-[#EACE8C]/20 text-left">
-                <div className="space-y-1">
-                  <h4 className="font-cinzel text-base text-[#1A1A1A] tracking-wider uppercase font-semibold">Faith & Luxury</h4>
-                  <p className="text-base text-[#1A1A1A]/60 font-light leading-relaxed">Collections inspired by majestic and signature royal themes.</p>
+              <div className="pt-4 border-t border-[#EACE8C]/20 text-left space-y-4">
+                <div className="space-y-1 text-center sm:text-left">
+                  <p className="font-serif italic text-base text-[#1A1A1A]/80 leading-relaxed">
+                    “An odour of a sweet smell, a sacrifice acceptable, wellpleasing to God.”
+                  </p>
+                  <p className="font-cinzel text-sm text-gold tracking-wider uppercase font-semibold">
+                    — Philippians 4:18
+                  </p>
                 </div>
-                <div className="space-y-1">
-                  <h4 className="font-cinzel text-base text-[#1A1A1A] tracking-wider uppercase font-semibold">Long Lasting</h4>
-                  <p className="text-base text-[#1A1A1A]/60 font-light leading-relaxed">Formulated without alcohol to stay rich on the skin for over 12 hours.</p>
+                
+                <div className="pt-4 text-center sm:text-left">
+                  <span className="text-lg font-cinzel text-[#1A1A1A] uppercase tracking-widest font-semibold block">
+                    The Sweet Savour
+                  </span>
+                  <span className="text-base font-serif italic text-[#1A1A1A]/60 block">
+                    Where fragrance becomes worship.
+                  </span>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
+      {/* 2.5: DIVINE ENCOUNTER SECTION */}
+      <section className="py-24 bg-white border-y border-[#EACE8C]/15">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-24">
+            
+            {/* Text Content */}
+            <div className="flex-1 text-center md:text-left space-y-6">
+              <span className="text-sm md:text-base font-cinzel text-gold uppercase tracking-widest font-semibold block animate-fade-in">
+                A Divine Encounter
+              </span>
+              <h2 className="text-4xl md:text-5xl font-serif text-[#1A1A1A] leading-tight">
+                Experience True Refinement
+              </h2>
+              <p className="text-lg text-[#1A1A1A]/70 font-light italic font-serif">
+                Let every scent you wear become a beautiful reflection of grace and purpose.
+              </p>
+            </div>
+
+            {/* Photo Element */}
+            <div className="flex-1 flex justify-center md:justify-end w-full">
+              <div className="w-full max-w-sm relative">
+                <div className="aspect-[4/5] rounded-xs overflow-hidden border border-[#EACE8C]/30 shadow-xl relative z-10 bg-[#FAF6F0]">
+                  <img 
+                    src="/photo.jpeg" 
+                    alt="Experience True Refinement" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                {/* Decorative background elements */}
+                <div className="absolute -top-4 -right-4 w-full h-full border border-gold/20 rounded-xs -z-10"></div>
+                <div className="absolute -bottom-4 -left-4 w-full h-full bg-[#FAF6F0] rounded-xs -z-20"></div>
+              </div>
             </div>
 
           </div>
-
         </div>
       </section>
 
@@ -495,8 +531,12 @@ export default function PublicPages({
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {collections.map((col) => {
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            {[...collections].sort((a, b) => {
+              if (a.status === 'Coming Soon' && b.status !== 'Coming Soon') return -1;
+              if (a.status !== 'Coming Soon' && b.status === 'Coming Soon') return 1;
+              return 0;
+            }).map((col) => {
               const isSelected = selectedColFilter === col.id;
               
               return (
@@ -511,7 +551,9 @@ export default function PublicPages({
                   <div className="absolute inset-0 z-0">
                     <img 
                       src={
-                        col.name.toLowerCase().includes('baruch') ? '/baruch bliss.jpeg' :
+                        (col.hero_image && !col.hero_image.includes("images.unsplash.com")) 
+                          ? col.hero_image 
+                          : col.name.toLowerCase().includes('baruch') ? '/baruch bliss.jpeg' :
                         (col.name.toLowerCase().includes('harsam') || col.name.toLowerCase().includes('hashem') || col.name.toLowerCase().includes('honey')) ? '/hero.jpeg' :
                         (col.name.toLowerCase().includes('adonia') || col.name.toLowerCase().includes('adonai') || col.name.toLowerCase().includes('ember')) ? '/adonia ember.jpeg' :
                         (col.hero_image || '/hero.jpeg')
@@ -736,7 +778,7 @@ export default function PublicPages({
                 12 to 24-Hour Longevity
               </h3>
               <p className="text-base text-[#1A1A1A]/60 font-light leading-relaxed">
-                Standard spray bottles dilute ingredients in 80% drying alcohol, causing rapid evaporation. Pure perfume oils anchor directly to your pulse points, releasing aromatic warmth consistently over hours.
+                Pure perfume oils anchor directly to your pulse points, releasing aromatic warmth consistently over hours without rapid evaporation.
               </p>
             </div>
 
@@ -745,12 +787,12 @@ export default function PublicPages({
               <div className="w-10 h-10 rounded-xs bg-[#FAF6F0] border border-[#EACE8C]/30 flex items-center justify-center">
                 <CheckCircle className="w-5 h-5 text-gold" />
               </div>
-              <h3 className="font-cinzel text-sm uppercase tracking-wider font-semibold text-[#1A1A1A]">
-                Alcohol-Free and Safe
-              </h3>
-              <p className="text-base text-[#1A1A1A]/60 font-light leading-relaxed">
-                Formulated precisely without harmful industrial alcohol, preserving natural botanical proteins and moisture. Delightfully hypoallergenic, making it ideal for daily application even on ultra-sensitive skins.
-              </p>
+              <h3 className="font-cinzel text-[#1A1A1A] font-bold text-lg uppercase tracking-widest mb-3">
+                  Gentle and Safe
+                </h3>
+                <p className="text-[#1A1A1A]/70 text-sm leading-relaxed">
+                  Formulated carefully to preserve natural botanical proteins and moisture. Delightfully hypoallergenic, making it ideal for daily application even on ultra-sensitive skins.
+                </p>
             </div>
 
             {/* Feature 3 */}
@@ -787,57 +829,77 @@ export default function PublicPages({
             Adored by Connoisseurs
           </h2>
 
-          <div className="min-h-[220px] flex flex-col justify-center items-center">
-            {/* Active Testimonial Card */}
-            <div className="space-y-6 animate-fade-in" key={activeTestimonial}>
-              
-              {/* Star line */}
-              <div className="flex justify-center space-x-1 text-gold">
-                {Array.from({ length: testimonials[activeTestimonial].rating }).map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-gold" />
-                ))}
-              </div>
-
-              {/* Text */}
-              <p className="text-base sm:text-base text-[#1A1A1A]/80 font-serif italic max-w-2xl mx-auto leading-relaxed">
-                "{testimonials[activeTestimonial].text}"
-              </p>
-
-              {/* Bio */}
-              <div className="flex items-center justify-center space-x-3 pt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {testimonials.map((testi, i) => (
+              <div 
+                key={testi.id} 
+                className="relative group rounded-xs overflow-hidden border border-[#EACE8C]/30 shadow-md bg-[#FAF6F0] hover:shadow-lg transition duration-300 cursor-pointer"
+                onClick={() => openLightbox(testi.avatar)}
+              >
                 <img 
-                  src={testimonials[activeTestimonial].avatar} 
-                  alt={testimonials[activeTestimonial].name} 
+                  src={testi.avatar} 
+                  alt={`Client Impression ${i+1}`} 
                   referrerPolicy="no-referrer"
-                  className="w-10 h-10 rounded-full border border-gold/30 object-cover shadow-sm"
+                  className="w-full h-72 object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                <div className="text-left">
-                  <h4 className="font-cinzel text-base font-semibold tracking-wider text-[#1A1A1A]">
-                    {testimonials[activeTestimonial].name}
-                  </h4>
-                  <span className="text-sm font-sans text-gold uppercase tracking-widest font-bold">
-                    {testimonials[activeTestimonial].verse}
-                  </span>
-                </div>
               </div>
-
-            </div>
-          </div>
-
-          {/* Carousel selectors */}
-          <div className="flex justify-center space-x-3 mt-10">
-            {testimonials.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setActiveTestimonial(i)}
-                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 focus:outline-hidden cursor-pointer ${
-                  activeTestimonial === i ? 'bg-gold w-6' : 'bg-[#EACE8C]/30 hover:bg-gold/45'
-                }`}
-                title={`Go to testimonial ${i + 1}`}
-                aria-label={`Go to testimonial ${i + 1}`}
-              />
             ))}
           </div>
+
+          {/* Lightbox Modal */}
+          {selectedImage && (
+            <div 
+              className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 sm:p-8"
+              onClick={closeLightbox}
+            >
+              <div className="relative w-full h-full flex flex-col items-center justify-center animate-fade-in overflow-hidden">
+                {/* Close Button */}
+                <button 
+                  className="absolute top-4 right-4 sm:top-8 sm:right-8 text-white/70 hover:text-white transition-colors cursor-pointer z-50 bg-black/50 p-2 rounded-full"
+                  onClick={closeLightbox}
+                  title="Close"
+                >
+                  <X className="w-8 h-8" />
+                </button>
+
+                {/* Zoom Controls */}
+                <div className="absolute bottom-6 sm:bottom-10 flex space-x-4 z-50 bg-black/50 p-3 rounded-full backdrop-blur-md" onClick={(e) => e.stopPropagation()}>
+                  <button 
+                    className="text-white/70 hover:text-white transition-colors cursor-pointer p-2 rounded-full hover:bg-white/10"
+                    onClick={() => setZoomLevel(prev => Math.max(0.5, prev - 0.5))}
+                    title="Zoom Out"
+                  >
+                    <ZoomOut className="w-6 h-6" />
+                  </button>
+                  <div className="flex items-center justify-center text-white font-sans w-12 select-none">
+                    {Math.round(zoomLevel * 100)}%
+                  </div>
+                  <button 
+                    className="text-white/70 hover:text-white transition-colors cursor-pointer p-2 rounded-full hover:bg-white/10"
+                    onClick={() => setZoomLevel(prev => Math.min(3, prev + 0.5))}
+                    title="Zoom In"
+                  >
+                    <ZoomIn className="w-6 h-6" />
+                  </button>
+                </div>
+
+                {/* Scrollable Image Container */}
+                <div 
+                  className="w-full h-full overflow-auto flex items-center justify-center"
+                  onClick={closeLightbox}
+                >
+                  <img 
+                    src={selectedImage} 
+                    className="max-w-full max-h-full object-contain shadow-2xl transition-transform duration-200 ease-out origin-center" 
+                    style={{ transform: `scale(${zoomLevel})` }}
+                    alt="Enlarged client impression" 
+                    onClick={(e) => e.stopPropagation()}
+                    draggable="false"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
         </div>
       </section>
