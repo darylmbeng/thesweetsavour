@@ -5,7 +5,7 @@ import {
   Testimonial, saveTestimonial, deleteTestimonial
 } from '../supabase';
 import { 
-  Shield, Key, User, Plus, Edit2, Trash2, Check, X, 
+  Shield, Key, User, Plus, Edit2, Trash2, Check, X, Star,
   Settings as SettingsIcon, Database, LayoutDashboard, ShoppingBag, 
   Tag, Upload, CheckCircle, AlertCircle, Copy, RefreshCw, Mail, Phone, Eye, ArrowUp, ArrowDown,
   Camera
@@ -1258,51 +1258,6 @@ export default function AdminPages({
                           referrerPolicy="no-referrer"
                           className="w-full h-full object-cover" 
                         />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Auxiliaries dynamic image grid upload */}
-                  <div className="sm:col-span-2 space-y-4 pt-4 border-t border-[#EACE8C]/15">
-                    <label className="text-sm font-cinzel text-[#1A1A1A]/40 uppercase tracking-widest block font-bold">Additional Images (Multiple Image Management)</label>
-                    
-                    <div className="flex space-x-2">
-                      <input
-                        type="text"
-                        value={newAuxUrl}
-                        onChange={(e) => setNewAuxUrl(e.target.value)}
-                        placeholder="Paste secondary image link or URL..."
-                        className="flex-1 py-2 px-3 bg-cream-gradient border border-[#EACE8C]/25 text-base text-[#1A1A1A] outline-hidden focus:border-gold/60 rounded-xs"
-                      />
-                      <button
-                        type="button"
-                        onClick={addAuxiliaryImage}
-                        className="py-2 px-4 bg-[#1A1A1A] text-white text-base font-semibold uppercase tracking-wider rounded-xs hover:bg-[#333]"
-                      >
-                        Add URL
-                      </button>
-                    </div>
-
-                    {auxiliaryImageUrls.length > 0 && (
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
-                        {auxiliaryImageUrls.map((url, index) => (
-                          <div key={index} className="aspect-square border border-[#EACE8C]/20 rounded-xs overflow-hidden relative group">
-                            <img 
-                              src={url} 
-                              alt="Product Image" 
-                              referrerPolicy="no-referrer"
-                              className="w-full h-full object-cover" 
-                            />
-                            <button
-                              type="button"
-                              onClick={() => removeAuxiliaryImage(index)}
-                              className="absolute top-1 right-1 p-1 bg-red-600 text-white rounded-full opacity-80 hover:opacity-100"
-                              title="Delete auxiliary mapping"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        ))}
                       </div>
                     )}
                   </div>
