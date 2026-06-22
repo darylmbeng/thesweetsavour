@@ -29,11 +29,7 @@ export default function App() {
       const imgs = await getProductImages();
       let tests = await getTestimonials();
       
-      // Force cache bust if user has old data with < 7 testimonials
-      if (tests.length < 7) {
-        window.localStorage.removeItem('sweetsavour_testimonials');
-        tests = INITIAL_TESTIMONIALS;
-      }
+
       
       const settingsData = await getSettings();
 
