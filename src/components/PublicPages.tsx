@@ -514,6 +514,67 @@ export default function PublicPages({
         </div>
       </section>
 
+      {/* 2.8: NEW ARRIVAL VIDEO SECTION */}
+      <section className="py-24 bg-[#0d0d0d] overflow-hidden relative">
+        {/* Decorative top border */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#EACE8C]/40 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#EACE8C]/40 to-transparent" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Section header */}
+          <div className="text-center mb-12 space-y-3">
+            <span className="text-sm font-cinzel text-gold uppercase tracking-[0.3em] font-semibold block animate-fade-in">
+              Now Available
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-serif text-white leading-tight">
+              Introducing Our Latest Creation
+            </h2>
+            <div className="w-12 h-px bg-gold/50 mx-auto mt-2" />
+            <p className="text-base text-white/50 font-light italic font-serif max-w-xl mx-auto">
+              A new fragrance born of grace — crafted for those who wear scent as an act of worship.
+            </p>
+          </div>
+
+          {/* Video container with protection overlay */}
+          <div className="relative max-w-4xl mx-auto rounded-xs overflow-hidden border border-[#EACE8C]/20 shadow-2xl group">
+            {/* Transparent overlay to block right-click save / drag download */}
+            <div
+              className="absolute inset-0 z-10 select-none"
+              onContextMenu={(e) => e.preventDefault()}
+              style={{ pointerEvents: 'all', userSelect: 'none' }}
+            />
+
+            <video
+              className="w-full h-auto block"
+              autoPlay
+              muted
+              loop
+              playsInline
+              controls
+              controlsList="nodownload nofullscreen noremoteplayback"
+              disablePictureInPicture
+              disableRemotePlayback
+              onContextMenu={(e) => e.preventDefault()}
+              style={{ pointerEvents: 'none' }}
+            >
+              <source src="/Test2.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+
+            {/* Re-enable pointer events on controls by layering a cut-out at bottom */}
+            <div
+              className="absolute bottom-0 left-0 right-0 h-12 z-20"
+              style={{ pointerEvents: 'none' }}
+            />
+          </div>
+
+          {/* Caption */}
+          <p className="text-center text-white/30 text-xs font-cinzel uppercase tracking-widest mt-6">
+            © The Sweet Savour — All Rights Reserved
+          </p>
+        </div>
+      </section>
+
       {/* 3. COLLECTIONS SECTION */}
       <section className="py-24 bg-[#FAF6F0]" id="collections-section">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
